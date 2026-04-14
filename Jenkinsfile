@@ -15,21 +15,18 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                echo 'Building Docker image... (NPM build runs within the multi-stage Dockerfile)'
-                script {
-                    appImage = docker.build("${IMAGE_NAME}:${env.BUILD_NUMBER}")
-                }
+                echo 'Building Docker image... '
+                sh "docker build -t ${IMAGE_NAME}:${env.BUILD_NUMBER} -t ${IMAGE_NAME}:latest ."
             }
         }
 
         stage('Push Docker Image') {
             steps {
                 echo 'Pushing image to the Registry...'
-                script {
-                    docker.withRegistry('', DOCKER_CREDS_ID) {
-                        appImage.push("${env.BUILD_NUMBER}")
-                        appImage.push('latest')
-                    }
+                withCredentials([usernamePassword(credentialsId: DOCKER_CREDS_ID, passwordVariable: 'DOCKER_PASS', usernameVariable: 'DOCKER_USER')]) {
+                    sh "echo \$DOCKER_PASS | docker login -u \$DOCKER_USER --password-stdin"
+                    sh "docker push ${IMAGE_NAME}:${env.BUILD_NUMBER}"
+                    sh "docker push ${IMAGE_NAME}:latest"
                 }
             }
         }
