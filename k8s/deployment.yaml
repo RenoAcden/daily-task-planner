@@ -14,8 +14,6 @@ spec:
       labels:
         app: daily-task-planner
     spec:
-      imagePullSecrets:
-      - name: dckr_pat_Oh47HmVwsrKZp_B3JgJq9j69JGc
       containers:
       - name: task-planner-container
         image: renoacden/daily-task-planner:1.0
